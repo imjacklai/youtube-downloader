@@ -1,0 +1,12 @@
+{
+  "name": "Youtube-Downloader",
+  "version": "0.0.1",
+  "description": "A simple youtube downloader based on youtube-dl library",
+  "main": "index.html",
+  "window": {
+    "width": 800,
+    "height": 600,
+    "title": "Youtube Downloader",
+    "toolbar": true
+  }
+}
