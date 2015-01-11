@@ -1,6 +1,7 @@
 var media = null;
 var video_format = null;
 var audio_format = null;
+var options = { 'audio': ["-x"], 'video': [], 'both': ["-k", "-x"] };
 
 $('input:radio').change(function() {
   media = $('input[type="radio"][name="media"]:checked').val()
@@ -36,4 +37,21 @@ $('#path-chooser').click(function() {
     $("#file-path").val($(this).val());
   });
   chooser.trigger('click');
+});
+
+$('#download-btn').click(function() {
+  var url = $('input#youtube-url').val();
+  $('input#youtube-url').val("");
+  var argus = options[media];
+
+  if (video_format !== null) {
+    argus.push("-f", video_format);
+  }
+  if (audio_format !== null) {
+    argus.push("--audio-format", audio_format);
+  }
+
+  argus.push("-o", $("#file-path").val() + "/%(title)s.%(ext)s", url);
+
+  console.log(argus);
 });
