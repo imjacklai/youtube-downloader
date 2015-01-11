@@ -2,7 +2,7 @@ input#youtube-url, input#file-path {
   width: 400px;
 }
 
-input#file-dialog {
+input#path-dialog {
   display: none;
 }
 

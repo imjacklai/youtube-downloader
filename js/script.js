@@ -29,3 +29,11 @@ $('select#audio-format').change(function() {
   audio_format = $('select#audio-format option:selected').val();
   $('#download-btn').prop({'disabled': false});
 });
+
+$('#path-chooser').click(function() {
+  var chooser = $('#path-dialog');
+  chooser.change(function(event) {
+    $("#file-path").val($(this).val());
+  });
+  chooser.trigger('click');
+});
