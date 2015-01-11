@@ -1,4 +1,4 @@
-var spawn = require('child_process').spawn;
+var process = require('child_process');
 var media = null;
 var video_format = null;
 var audio_format = null;
@@ -58,17 +58,32 @@ $('#download-btn').click(function() {
 });
 
 function download(argus) {
-  var child = spawn("youtube-dl", argus);
+  var url = argus[argus.length - 1];
+  var id = url.split("=")[1];
 
-  child.stdout.on('data', function (data) {
-    console.log(data);
-  });
+  // Get video's title
+  process.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
+    if (error !== null) {
+      $("#state").text("這不是正確的網址");
+    }
+    else {
+      var progressbar = "<p class='align-left'>" + stdout + "</p><div class='progress'><div id='" + id + "' class='progress-bar' role='progressbar' data-transitiongoal=''></div></div>";
+      $(".container").append(progressbar);
 
-  child.stderr.on('data', function (data) {
-    
-  });
+      var child = process.spawn("youtube-dl", argus);
 
-  child.on('exit', function (code) {
-    
+      child.stdout.on('data', function (data) {
+        value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
+        $("#" + id).attr('data-transitiongoal', value).progressbar({display_text: 'fill'});
+      });
+
+      child.stderr.on('data', function (data) {
+        console.log(data);
+      });
+
+      child.on('close', function (code) {
+        $("#" + id).attr('data-transitiongoal', 100).progressbar({display_text: 'fill'});
+      });
+    }
   });
 }
