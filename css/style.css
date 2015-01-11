@@ -1,0 +1,7 @@
+input#youtube-url, input#file-path {
+  width: 400px;
+}
+
+.wrapper {
+  margin-bottom: 10px;
+}

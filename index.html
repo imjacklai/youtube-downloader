@@ -5,9 +5,64 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
 
   <body>
-    Youtube Downlader
+    <nav class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <span class="navbar-brand">Youtube Downloader</span>
+        </div>
+        
+        <div class="navbar-form navbar-left">
+          <div class="form-group">
+            <input type="text" id="youtube-url" class="form-control" placeholder="貼上youtube影片網址" autocomplete="off" autofocus>
+          </div>
+          <button type="button" id="download-btn" class="btn btn-default" disabled>下載</button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container container-fluid">
+      <div class="wrapper">
+        <label class="radio-inline">
+          <input type="radio" name="format" value="video_only" disabled> 只下載影片
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="format" value="audio_only" disabled> 只下載音樂
+        </label>
+        <label class="radio-inline">
+          <input type="radio" name="format" value="video_audio" disabled> 下載音樂 &amp; 影片
+        </label>
+      </div>
+
+      <div class="wrapper">
+        <span>影片檔案格式: </span>
+        <select id="video_type" disabled>
+          <option value="null" disabled selected> -- 選一種影片格式 -- </option>
+          <option value="mp4">mp4</option>
+          <option value="m4a">m4a</option>
+          <option value="flv">flv</option>
+        </select>
+
+        <span>音樂檔案格式: </span>
+        <select id="audio_type" disabled>
+          <option value="null" disabled selected> -- 選一種音樂格式 -- </option>
+          <option value="mp3">mp3</option>
+          <option value="aac">aac</option>
+          <option value="m4a">m4a</option>
+          <option value="wav">wav</option>
+        </select>
+      </div>
+
+      <div class="wrapper">
+        <input style="display:none;" id="file-dialog" type="file" nwdirectory nwworkingdir="/Users/jacklai/Desktops" />
+        <span>下載至：</span>
+        <input type="text" id="file-path" value="/Users/jacklai/Desktop" disabled>
+        <button type="button" id="file-chooser" class="btn btn-default btn-xs">變更</button>
+      </div>
+
+      <hr>
   </body>
 </html>
