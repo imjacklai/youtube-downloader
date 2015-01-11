@@ -1,3 +1,4 @@
+var spawn = require('child_process').spawn;
 var media = null;
 var video_format = null;
 var audio_format = null;
@@ -53,5 +54,21 @@ $('#download-btn').click(function() {
 
   argus.push("-o", $("#file-path").val() + "/%(title)s.%(ext)s", url);
 
-  console.log(argus);
+  download(argus);
 });
+
+function download(argus) {
+  var child = spawn("youtube-dl", argus);
+
+  child.stdout.on('data', function (data) {
+    console.log(data);
+  });
+
+  child.stderr.on('data', function (data) {
+    
+  });
+
+  child.on('exit', function (code) {
+    
+  });
+}
