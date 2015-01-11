@@ -27,19 +27,19 @@
     <div class="container container-fluid">
       <div class="wrapper">
         <label class="radio-inline">
-          <input type="radio" name="format" value="video_only" disabled> 只下載影片
+          <input type="radio" name="media" value="video"> 只下載影片
         </label>
         <label class="radio-inline">
-          <input type="radio" name="format" value="audio_only" disabled> 只下載音樂
+          <input type="radio" name="media" value="audio"> 只下載音樂
         </label>
         <label class="radio-inline">
-          <input type="radio" name="format" value="video_audio" disabled> 下載音樂 &amp; 影片
+          <input type="radio" name="media" value="both"> 下載音樂 &amp; 影片
         </label>
       </div>
 
       <div class="wrapper">
         <span>影片檔案格式: </span>
-        <select id="video_type" disabled>
+        <select id="video-format" disabled>
           <option value="null" disabled selected> -- 選一種影片格式 -- </option>
           <option value="mp4">mp4</option>
           <option value="m4a">m4a</option>
@@ -47,7 +47,7 @@
         </select>
 
         <span>音樂檔案格式: </span>
-        <select id="audio_type" disabled>
+        <select id="audio-format" disabled>
           <option value="null" disabled selected> -- 選一種音樂格式 -- </option>
           <option value="mp3">mp3</option>
           <option value="aac">aac</option>
@@ -57,7 +57,7 @@
       </div>
 
       <div class="wrapper">
-        <input style="display:none;" id="file-dialog" type="file" nwdirectory nwworkingdir="/Users/jacklai/Desktops" />
+        <input id="file-dialog" type="file" nwdirectory nwworkingdir="/Users/jacklai/Desktops" />
         <span>下載至：</span>
         <input type="text" id="file-path" value="/Users/jacklai/Desktop" disabled>
         <button type="button" id="file-chooser" class="btn btn-default btn-xs">變更</button>
