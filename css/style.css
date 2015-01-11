@@ -2,6 +2,10 @@ input#youtube-url, input#file-path {
   width: 400px;
 }
 
+input#file-dialog {
+  display: none;
+}
+
 .wrapper {
   margin-bottom: 10px;
 }
