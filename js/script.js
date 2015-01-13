@@ -61,29 +61,31 @@ function download(argus) {
   var url = argus[argus.length - 1];
   var id = url.split("=")[1];
 
+  var progressbar = "<p id='title-" + id + "' class='align-left'>標題擷取中...</p><div class='progress'><div id='" + id + "' class='progress-bar' role='progressbar' data-transitiongoal=''></div></div>";
+  $(".container").append(progressbar);
+
   // Get video's title
   process.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
     if (error !== null) {
       $("#state").text("這不是正確的網址");
     }
     else {
-      var progressbar = "<p class='align-left'>" + stdout + "</p><div class='progress'><div id='" + id + "' class='progress-bar' role='progressbar' data-transitiongoal=''></div></div>";
-      $(".container").append(progressbar);
-
-      var child = process.spawn("youtube-dl", argus);
-
-      child.stdout.on('data', function (data) {
-        value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
-        $("#" + id).attr('data-transitiongoal', value).progressbar({display_text: 'fill'});
-      });
-
-      child.stderr.on('data', function (data) {
-        console.log(data);
-      });
-
-      child.on('close', function (code) {
-        $("#" + id).attr('data-transitiongoal', 100).progressbar({display_text: 'fill'});
-      });
+      $('p#title-' + id).text(stdout);
     }
+  });
+
+  child = process.spawn("youtube-dl", argus);
+
+  child.stdout.on('data', function (data) {
+    value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
+    $("#" + id).attr('data-transitiongoal', value).progressbar({display_text: 'fill'});
+  });
+
+  child.stderr.on('data', function (data) {
+    console.log(data);
+  });
+
+  child.on('close', function (code) {
+    $("#" + id).attr('data-transitiongoal', 100).progressbar({display_text: 'fill'});
   });
 }
