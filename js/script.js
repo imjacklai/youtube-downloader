@@ -43,7 +43,7 @@ $('#path-chooser').click(function() {
 $('#download-btn').click(function() {
   var url = $('input#youtube-url').val();
   $('input#youtube-url').val("");
-  var argus = options[media];
+  var argus = options[media].slice();
 
   if (video_format !== null) {
     argus.push("-f", video_format);
@@ -74,7 +74,7 @@ function download(argus) {
     }
   });
 
-  child = process.spawn("youtube-dl", argus);
+  var child = process.spawn("youtube-dl", argus);
 
   child.stdout.on('data', function (data) {
     value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
@@ -82,10 +82,9 @@ function download(argus) {
   });
 
   child.stderr.on('data', function (data) {
-    console.log(data);
   });
 
-  child.on('close', function (code) {
+  child.on('exit', function (code) {
     $("#" + id).attr('data-transitiongoal', 100).progressbar({display_text: 'fill'});
   });
 }
