@@ -3,6 +3,9 @@ var media = null;
 var video_format = null;
 var audio_format = null;
 var options = { 'audio': ["-x"], 'video': [], 'both': ["-k", "-x"] };
+var process_queue = new Array();
+var max_process = 4;
+var current_process_count = 0;
 
 $('input:radio').change(function() {
   media = $('input[type="radio"][name="media"]:checked').val()
@@ -42,6 +45,7 @@ $('#path-chooser').click(function() {
 
 $('#download-btn').click(function() {
   var url = $('input#youtube-url').val();
+  if (url == '') return;
   $('input#youtube-url').val("");
   var argus = options[media].slice();
 
@@ -54,10 +58,10 @@ $('#download-btn').click(function() {
 
   argus.push("-o", $("#file-path").val() + "/%(title)s.%(ext)s", url);
 
-  download(argus);
+  get_title(argus);
 });
 
-function download(argus) {
+function get_title(argus) {
   var url = argus[argus.length - 1];
   var id = url.split("=")[1];
 
@@ -67,17 +71,32 @@ function download(argus) {
   // Get video's title
   process.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
     if (error !== null) {
-      $("#state").text("這不是正確的網址");
+      $('p#title-' + id).text(url + " 這不是正確的網址");
     }
     else {
       $('p#title-' + id).text(stdout);
+
+      if (current_process_count < max_process) {
+        download(argus);
+      }
+      else {
+        process_queue.push(argus);
+      }
     }
   });
+}
+
+function download(argus) {
+  var url = argus[argus.length - 1];
+  var id = url.split("=")[1];
 
   var child = process.spawn("youtube-dl", argus);
 
+  current_process_count += 1;
+  console.log("a process run, total:" + current_process_count);
+
   child.stdout.on('data', function (data) {
-    value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
+    var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
     $("#" + id).attr('data-transitiongoal', value).progressbar({display_text: 'fill'});
   });
 
@@ -86,5 +105,10 @@ function download(argus) {
 
   child.on('exit', function (code) {
     $("#" + id).attr('data-transitiongoal', 100).progressbar({display_text: 'fill'});
+    current_process_count -= 1;
+    console.log("a process exit, total:" + current_process_count);
+    if (current_process_count < max_process && process_queue.length != 0) {
+      download(process_queue.shift())
+    }
   });
 }
