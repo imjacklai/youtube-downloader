@@ -1,4 +1,4 @@
-var process = require('child_process');
+var proc = require('child_process');
 var process_queue = new Array();
 var max_process = 2;
 var current_process_count = 0;
@@ -50,7 +50,7 @@ function get_title(argus) {
   var id = url.split("=")[1];
 
   // Get video's title
-  process.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
+  proc.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
     if (error !== null) {
       $('div.icon.input').removeClass('loading').addClass('error');
       $('#youtube-url').prop('disabled', false).prop('placeholder', '這不是正確的網址');
@@ -78,7 +78,7 @@ function download(argus) {
   var id = url.split("=")[1];
   current_process_count += 1;
 
-  var child = process.spawn("youtube-dl", argus);
+  var child = proc.spawn("youtube-dl", argus);
   child.stdout.on('data', function (data) {
     var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
     if (value >= 0)
