@@ -4,72 +4,56 @@
     <title>Youtube Downloader</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="css/icon.min.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
 
   <body>
-    <nav class="navbar navbar-default">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <span class="navbar-brand">Youtube Downloader</span>
+    <div class="ui blue inverted large menu">
+      <span class="active item">
+        Youtube Downloader
+      </span>
+      <div id="video-format" class="ui floating dropdown item" data-content="選擇下載的影片檔案格式">
+        <i class="record icon"></i>
+        <div class="text">影片格式</div>
+        <div class="menu">
+          <a class="item">不下載</a>
+          <a class="item">mp4</a>
+          <a class="item">m4a</a>
+          <a class="item">flv</a>
         </div>
-        
-        <div class="navbar-form navbar-left">
-          <div class="form-group">
-            <input type="text" id="youtube-url" class="form-control" placeholder="貼上youtube影片網址" autocomplete="off" autofocus>
-          </div>
-          <button type="button" id="download-btn" class="btn btn-default" disabled>下載</button>
+      </div>
+      <div id="audio-format" class="ui floating dropdown item" data-content="選擇下載的音樂檔案格式">
+        <i class="music icon"></i>
+        <div class="text">音樂格式</div>
+        <div class="menu">
+          <a class="item">不下載</a>
+          <a class="item">mp3</a>
+          <a class="item">aac</a>
+          <a class="item">m4a</a>
+          <a class="item">wav</a>
         </div>
       </div>
-    </nav>
-
-    <div class="container container-fluid">
-      <div class="wrapper">
-        <label class="radio-inline">
-          <input type="radio" name="media" value="video"> 只下載影片
-        </label>
-        <label class="radio-inline">
-          <input type="radio" name="media" value="audio"> 只下載音樂
-        </label>
-        <label class="radio-inline">
-          <input type="radio" name="media" value="both"> 下載音樂 &amp; 影片
-        </label>
+      <div class="item">
+        <input id="path-dialog" type="file" nwdirectory nwworkingdir="/Users/jacklai/Desktop" />
+        <div id="path-chooser" class="ui blue icon button" data-content="/Users/jacklai/Desktop">
+          <i class="folder icon"></i> 下載至
+        </div>
       </div>
-
-      <div class="wrapper">
-        <span>影片檔案格式: </span>
-        <select id="video-format" disabled>
-          <option value="null" disabled selected> -- 選一種影片格式 -- </option>
-          <option value="mp4">mp4</option>
-          <option value="m4a">m4a</option>
-          <option value="flv">flv</option>
-        </select>
-
-        <span>音樂檔案格式: </span>
-        <select id="audio-format" disabled>
-          <option value="null" disabled selected> -- 選一種音樂格式 -- </option>
-          <option value="mp3">mp3</option>
-          <option value="aac">aac</option>
-          <option value="m4a">m4a</option>
-          <option value="wav">wav</option>
-        </select>
+      <div class="item">
+        <div class="ui small icon input">
+          <input id="youtube-url" type="text" placeholder="貼上youtube影片網址，並按下enter開始下載">
+          <i class="arrow down icon"></i>
+        </div>
       </div>
-
-      <div class="wrapper">
-        <input id="path-dialog" type="file" nwdirectory nwworkingdir="/Users/jacklai/Desktops" />
-        <span>下載至：</span>
-        <input type="text" id="file-path" value="/Users/jacklai/Desktop" disabled>
-        <button type="button" id="path-chooser" class="btn btn-default btn-xs">變更</button>
-      </div>
-
-      <hr>
-
     </div>
 
-      <script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
-      <script type="text/javascript" src="js/bootstrap-progressbar.min.js"></script>
-      <script type="text/javascript" src="js/gui.js"></script>
-      <script type="text/javascript" src="js/script.js"></script>
+    <div class="container"></div>
+
+    <script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="js/semantic.min.js"></script>
+    <script type="text/javascript" src="js/gui.js"></script>
+    <script type="text/javascript" src="js/script.js"></script>
   </body>
 </html>

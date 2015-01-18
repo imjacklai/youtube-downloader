@@ -1,11 +1,24 @@
-input#youtube-url, input#file-path {
-  width: 400px;
+body {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-input#path-dialog {
+#path-dialog {
   display: none;
 }
 
-.wrapper {
-  margin-bottom: 10px;
+div.ui.large.menu {
+  margin: 10px;
+}
+
+div.ui.small.icon.input {
+  width: 400px;
+}
+
+div.ui.floating.dropdown.item {
+  width: 120px;
+}
+
+.container {
+  margin: 10px;
 }
