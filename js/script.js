@@ -53,7 +53,7 @@ function get_title(argus) {
   proc.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
     if (error !== null) {
       $('div.icon.input').removeClass('loading').addClass('error');
-      $('#youtube-url').prop('disabled', false).prop('placeholder', '這不是正確的網址');
+      $('#youtube-url').prop('disabled', false).prop('placeholder', '這不是正確的網址').transition('shake');
     }
     else {
       $('div.icon.input').removeClass('loading');
