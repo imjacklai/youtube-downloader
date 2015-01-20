@@ -4,13 +4,46 @@ var max_process = 2;
 var current_process_count = 0;
 var argus = null;
 
-$('.dropdown').dropdown({ action: 'activate' });
-$('.dropdown, #path-chooser').popup();
+$('#link').click(function() {
+  gui.Shell.openExternal("https://github.com/rg3/youtube-dl");
+});
+
+$('.info.circle.icon').click(function() {
+  $('.basic.modal').modal('show');
+})
+
+$('#video-format').dropdown('set selected', localStorage.video_format);
+$('#audio-format').dropdown('set selected', localStorage.audio_format);
+$('#path-dialog').prop('nwworkingdir', localStorage.dir_path);
+$('#path-chooser').data('content', localStorage.dir_path);
+
+$('#video-format').dropdown({
+  action: 'activate',
+  onChange: function(value) {
+    if (value != null)
+      localStorage.video_format = value;
+  }
+});
+
+$('#audio-format').dropdown({
+  action: 'activate',
+  onChange: function(value) {
+    if (value != null)
+      localStorage.audio_format = value;
+  }
+});
+
+$('#path-chooser').popup();
 
 $('#path-chooser').click(function() {
   var chooser = $('#path-dialog');
   chooser.change(function(event) {
-    $('#path-chooser').data('content', $(this).val());
+    var path = $(this).val();
+    if (path != '') {
+      $('#path-dialog').prop('nwworkingdir', $(this).val());
+      $('#path-chooser').data('content', $(this).val());
+      localStorage.dir_path = $(this).val();
+    }
   });
   chooser.trigger('click');
 });
