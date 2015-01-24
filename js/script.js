@@ -1,131 +1,189 @@
-var proc = require('child_process');
-var process_queue = new Array();
-var max_process = 2;
-var current_process_count = 0;
+var childProcess = require('child_process');
+var processQueue = new Array();
+var maxProcessCount = 2;
+var currentProcessCount = 0;
 var argus = null;
+
+// localStorage.clear();
 
 $('#link').click(function() {
   gui.Shell.openExternal("https://github.com/rg3/youtube-dl");
 });
 
-$('.info.circle.icon').click(function() {
+$('.title, .title i').click(function() {
   $('.basic.modal').modal('show');
 })
 
-$('#video-format').dropdown('set selected', localStorage.video_format);
-$('#audio-format').dropdown('set selected', localStorage.audio_format);
-$('#path-dialog').prop('nwworkingdir', localStorage.dir_path);
-$('#path-chooser').data('content', localStorage.dir_path);
+// set the download settings for users that they used last time
+$('#video-format').dropdown('set selected', localStorage.videoFormat);
+$('#audio-format').dropdown('set selected', localStorage.audioFormat);
+$('#path-dialog').prop('nwworkingdir', localStorage.dirPath);
+$('#path-chooser').data('content', localStorage.dirPath);
 
+// video-format dropdown event
+// store the format into local storage for next time use
 $('#video-format').dropdown({
   action: 'activate',
   onChange: function(value) {
     if (value != null)
-      localStorage.video_format = value;
+      localStorage.videoFormat = value;
   }
 });
 
+// audio-format dropdown event
+// store the format into local storage for next time use
 $('#audio-format').dropdown({
   action: 'activate',
   onChange: function(value) {
     if (value != null)
-      localStorage.audio_format = value;
+      localStorage.audioFormat = value;
   }
 });
 
+// display the current download directory path when hover on it
 $('#path-chooser').popup();
 
+// choose the download directory path
 $('#path-chooser').click(function() {
   var chooser = $('#path-dialog');
   chooser.change(function(event) {
     var path = $(this).val();
     if (path != '') {
-      $('#path-dialog').prop('nwworkingdir', $(this).val());
-      $('#path-chooser').data('content', $(this).val());
-      localStorage.dir_path = $(this).val();
+      $('#path-dialog').prop('nwworkingdir', path);
+      $('#path-chooser').data('content', path);
+      localStorage.dirPath = path;
     }
   });
   chooser.trigger('click');
 });
 
-$('#youtube-url').keypress(function(event) {
+// detect the input field key press event
+$('#url-input').keypress(function(event) {
+  // only press enter will do the following
   if(event.keyCode == '13') {
     var url = $(this).val();
     if (url == '') return;
-    $('#youtube-url').val('');
+    $(this).val('');
 
     argus = [].slice();
-    var video_format = $('#video-format').dropdown('get text');
-    var audio_format = $('#audio-format').dropdown('get text');
+    var videoFormat = $('#video-format').dropdown('get text');
+    var audioFormat = $('#audio-format').dropdown('get text');
     
-    if (video_format != '影片格式' && video_format != '不下載' && (audio_format == '音樂格式' || audio_format == '不下載')) {
-      argus.push("-f", video_format);
-    }
-    else if ((video_format == '影片格式' || video_format == '不下載') && audio_format != '音樂格式' && audio_format != '不下載') {
-      argus.push("-x", "--audio-format", audio_format);
-    }
-    else if (video_format != '影片格式' && video_format != '不下載' && audio_format != '音樂格式' && audio_format != '不下載') {
-      argus.push("-k", "-x", "-f", video_format, "--audio-format", audio_format);
-    }
-    else {
+    if ((videoFormat == '影片格式' || videoFormat == '不下載') && (audioFormat == '音樂格式' || audioFormat == '不下載')) {
+      // display error message
+      $('.icon.input').addClass('error');
+      $(this).prop('placeholder', '請至少選擇一種下載格式').transition('shake');
       return;
     }
+    if (videoFormat != '影片格式' && videoFormat != '不下載')
+      argus.push("-k", "-f", videoFormat);
+    if (audioFormat != '音樂格式' && audioFormat != '不下載')
+      argus.push("-x", "--audio-format", audioFormat);
 
     argus.push("-o", $('#path-chooser').data('content') + "/%(title)s.%(ext)s", url);
-    get_title(argus);
+    getTitle(argus);
   }
 });
 
-function get_title(argus) {
-  $('div.icon.input').removeClass('error').addClass('loading');
-  $('#youtube-url').prop('disabled', 'disabled').prop('placeholder', '貼上youtube影片網址，並按下enter開始下載');
+function getTitle(argus) {
   var url = argus[argus.length - 1];
-  var id = url.split("=")[1];
+  var id = url.match(/v=((\d|\w|\S){11})/);
+  if (id != null)
+    id = id[1];
+  else {
+    $('.icon.input').addClass('error');
+    $('#url-input').prop('placeholder', '這不是正確的網址').transition('shake');
+    return;
+  }
+
+  var type = null;
+  var color = null;
+
+  if (url.indexOf("list=") != -1) {
+    type = "清單";
+    color = "teal";
+  }
+  else {
+    type = "單曲";
+    color = "red";
+  }
+
+  $('.icon.input').removeClass('error').addClass('loading');
+  $('#url-input').prop('disabled', 'disabled').prop('placeholder', '貼上youtube影片網址，並按下enter開始下載');
 
   // Get video's title
-  proc.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
+  childProcess.exec("youtube-dl -e " + url, { encoding: 'utf8' }, function(error, stdout, stderr) {
     if (error !== null) {
       $('div.icon.input').removeClass('loading').addClass('error');
-      $('#youtube-url').prop('disabled', false).prop('placeholder', '這不是正確的網址').transition('shake');
+      $('#url-input').prop('disabled', false).prop('placeholder', '這不是正確的網址').transition('shake');
     }
     else {
       $('div.icon.input').removeClass('loading');
-      $('#youtube-url').prop('disabled', false);
-      var progressbar = "<div id='" + id + "' class='ui progress'> \
-                           <span>" + stdout + "</span> \
-                           <div class='bar'> \
-                             <div class='progress'></div> \
-                           </div> \
+      $('#url-input').prop('disabled', false);
+      var progressbar = "<div class='ui tiny " + color + " horizontal label'>" + type + "</div> \
+                         <span id='title-" + id + "'>" + stdout + "</span> \
+                         <div id='" + id + "' class='ui small progress'> \
+                          <div class='bar'> \
+                            <div class='progress'></div> \
+                          </div> \
                          </div>";
       $(".container").append(progressbar);
-      if (current_process_count < max_process)
+      if (currentProcessCount < maxProcessCount)
         download(argus);
       else
-        process_queue.push(argus);
+        processQueue.push(argus);
     }
   });
 }
 
 function download(argus) {
   var url = argus[argus.length - 1];
-  var id = url.split("=")[1];
-  current_process_count += 1;
+  var id = url.match(/v=((\d|\w|\S){11})/)[1];
+  var type = null;
+  currentProcessCount += 1;
 
-  var child = proc.spawn("youtube-dl", argus);
+  if (url.indexOf("list=") != -1) {
+    type = "list";
+  }
+  else {
+    type = "single";
+  }
+
+  var message = ['', '', 0, 0];
+
+  var child = childProcess.spawn("youtube-dl", argus);
   child.stdout.on('data', function (data) {
-    var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
-    if (value >= 0)
-      $('#' + id).progress({ percent: value });
+    if (type == 'single') {
+      var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
+      if (value >= 0)
+        $('#' + id).progress({ percent: value });
+    }
+    else if (type == 'list') {
+      var currentNumAndTotalNum = data.toString().match(/#(\d{1,3}) of (\d{1,3})/);
+      var currentTitle = data.toString().match(/Destination\:(.*)\.\w+/);
+
+      if (currentNumAndTotalNum != null) {
+        message[0] = currentNumAndTotalNum[0];            // eg. 3 of 111
+        message[2] = parseInt(currentNumAndTotalNum[1]);  // the current video's number
+        message[3] = parseInt(currentNumAndTotalNum[2]);  // number of total videos
+      }
+      if (currentTitle != null) {
+        var temp = currentTitle[1].split('/');
+        message[1] = temp[temp.length - 1];
+        
+        $('#title-' + id).html(message.slice(0, 2).join(": "));
+        $('#' + id).progress({ percent: (message[2]-1)/message[3] });
+      }
+    }
   });
 
-  child.stderr.on('data', function (data) {
-  });
+  child.stderr.on('data', function (data) {});
 
   child.on('exit', function (code) {
     $('#' + id).progress({ percent: 100 });
-    current_process_count -= 1;
-    if (current_process_count < max_process && process_queue.length != 0) {
-      download(process_queue.shift())
+    currentProcessCount -= 1;
+    if (currentProcessCount < maxProcessCount && processQueue.length != 0) {
+      download(processQueue.shift())
     }
   });
 }

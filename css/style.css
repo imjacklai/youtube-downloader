@@ -13,10 +13,11 @@ body {
   color: white;
   text-align: center;
   font-size: 25px;
+  cursor: pointer;
 }
 
 .title > i {
-  font-size: 18px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -31,7 +32,7 @@ div.ui.floating.dropdown {
   text-align: center;
 }
 
-.dir {
+.dir-path {
   display: inline-block;
   width: 150px;
   text-align: center;
@@ -52,12 +53,14 @@ div.ui.icon.input {
 }
 
 .container {
-  margin: 0 10px 0 10px;
+  margin: 10px 10px 0 10px;
 }
 
-.ui.progress, .ui.progress:first-child {
+.ui.progress, .ui.progress:first-child, .ui.progress:last-child {
   border: none;
   margin: 10px 0 10px;
+  padding: 0;
+  background: transparent;
 }
 
 span {
