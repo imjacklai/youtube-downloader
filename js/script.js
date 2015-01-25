@@ -78,56 +78,54 @@ $('#url-input').keypress(function(event) {
 
     argus.push("-o", $('#path-chooser').data('content') + "/%(title)s.%(ext)s", url);
 
-    var id = url.match(/v=((\d|\w|\S){11})/);
+    var type = null;
+    var id = url.match(/list=([a-zA-Z0-9_-]+)&?/);
+    // for playlist
     if (id != null) {
       id = id[1];
+      type = '清單';
     }
+    // for single
     else {
-      showErrorMessage('這不是正確的網址');
-      return;
+      id = url.match(/v=([a-zA-Z0-9_-]+)&?/);
+      if (id != null) {
+        id = id[1];
+        type = '單曲';
+      }
+      else {
+        showErrorMessage('這不是正確的網址');
+        return;
+      }
     }
 
-    var type = (url.indexOf("list=") != -1) ? '清單' : '單曲';
-    getTitle({'argus': argus, 'url': url, 'id': id, 'type': type});
+    if (currentProcessCount < maxProcessCount)
+      download({'argus': argus, 'url': url, 'id': id, 'type': type});
+    else
+      processQueue.push({'argus': argus, 'url': url, 'id': id, 'type': type});
   }
 });
-
-function getTitle(argus) {
-  $('.icon.input').removeClass('error').addClass('loading');
-  $('#url-input').prop('disabled', 'disabled').prop('placeholder', '載入中...');
-
-  // Get video's title
-  childProcess.exec("youtube-dl -e " + argus['url'], { encoding: 'utf8' }, function(error, stdout, stderr) {
-    $('div.icon.input').removeClass('loading');
-    $('#url-input').prop('disabled', false);
-    if (error !== null) {
-      showErrorMessage('這不是正確的網址');
-    }
-    else {
-      $('#url-input').prop('placeholder', '貼上youtube影片網址，並按下enter開始下載')
-      var progressbar = "<div class='ui tiny " + color[argus['type']] + " horizontal label'>" + argus['type'] + "</div> \
-                         <span id='title-" + argus['id'] + "'>" + stdout + "</span> \
-                         <div id='" + argus['id'] + "' class='ui small progress'> \
-                          <div class='bar'> \
-                            <div class='progress'></div> \
-                          </div> \
-                         </div>";
-      $(".container").append(progressbar);
-      if (currentProcessCount < maxProcessCount)
-        download(argus);
-      else
-        processQueue.push(argus);
-    }
-  });
-}
 
 function download(argus) {
   currentProcessCount += 1;
   var message = ['', '', 0, 0];
 
+  var progressbar = "<div class='ui tiny " + color[argus['type']] + " horizontal label'>" + argus['type'] + "</div> \
+                     <span id='title-" + argus['id'] + "'>載入中...</span> \
+                     <div id='" + argus['id'] + "' class='ui small progress'> \
+                      <div class='bar'> \
+                        <div class='progress'></div> \
+                      </div> \
+                     </div>";
+  $(".container").append(progressbar);
+
   var child = childProcess.spawn("youtube-dl", argus['argus']);
   child.stdout.on('data', function (data) {
     if (argus['type'] == '單曲') {
+      var title = data.toString().match(/Destination\:(.*)\.\w+/);
+      if (title != null) {
+        var temp = title[1].split('/');
+        $('#title-' + argus['id']).html(temp[temp.length - 1]);
+      }
       var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
       if (value >= 0)
         $('#' + argus['id']).progress({ percent: value });
@@ -145,13 +143,15 @@ function download(argus) {
         var temp = currentTitle[1].split('/');
         message[1] = temp[temp.length - 1];
         
-        $('#title-' + argus['id']).html(message.slice(0, 2).join(": "));
+        $('#title-' + argus['id']).html(message.slice(0,2).join(": "));
         $('#' + argus['id']).progress({ percent: (message[2]-1)/message[3] });
       }
     }
   });
 
-  child.stderr.on('data', function (data) {});
+  child.stderr.on('data', function (data) {
+    $('#title-' + argus['id']).html('這個影片不存在');
+  });
 
   child.on('exit', function (code) {
     $('#' + argus['id']).progress({ percent: 100 });
