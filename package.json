@@ -4,7 +4,7 @@
   "description": "A simple youtube downloader based on youtube-dl library",
   "main": "index.html",
   "window": {
-    "width": 460,
+    "width": 600,
     "height": 600,
     "title": "Youtube Downloader",
     "toolbar": true
