@@ -1,6 +1,6 @@
 var childProcess = require('child_process');
 var processQueue = new Array();
-var maxProcessCount = 2;
+var maxProcessCount = 4;
 var currentProcessCount = 0;
 var color = { '單曲': 'red', '清單': 'teal' };
 
@@ -16,13 +16,11 @@ $('.title, .title i').click(function() {
   $('.basic.modal').modal('show');
 })
 
-// set the download settings for users that they used last time
 $('#video-format').dropdown('set selected', localStorage.videoFormat);
 $('#audio-format').dropdown('set selected', localStorage.audioFormat);
 $('#path-dialog').prop('nwworkingdir', localStorage.dirPath);
 $('#path-chooser').data('content', localStorage.dirPath);
 
-// video-format dropdown event, store the format into local storage for next time use
 $('#video-format').dropdown({
   action: 'activate',
   onChange: function(value) {
@@ -30,7 +28,6 @@ $('#video-format').dropdown({
   }
 });
 
-// audio-format dropdown event, store the format into local storage for next time use
 $('#audio-format').dropdown({
   action: 'activate',
   onChange: function(value) {
@@ -38,10 +35,7 @@ $('#audio-format').dropdown({
   }
 });
 
-// display the current directory path when hover on it
 $('#path-chooser').popup();
-
-// choose the directory path
 $('#path-chooser').click(function() {
   var chooser = $('#path-dialog');
   chooser.change(function(event) {
@@ -55,12 +49,12 @@ $('#path-chooser').click(function() {
   chooser.trigger('click');
 });
 
-// detect the input field key press event
 $('#url-input').keypress(function(event) {
-  // only press enter will do the following
   if(event.keyCode == '13') {
     var url = $(this).val();
     if (url == '') return;
+    $('.icon.input').removeClass('error');
+    $(this).prop('placeholder', '貼上youtube影片網址，並按下enter開始下載');
     $(this).val('');
 
     var argus = [];
@@ -80,13 +74,11 @@ $('#url-input').keypress(function(event) {
 
     var type = null;
     var id = url.match(/list=([a-zA-Z0-9_-]+)&?/);
-    // for playlist
-    if (id != null) {
+    if (id != null) { // for playlist
       id = id[1];
       type = '清單';
     }
-    // for single
-    else {
+    else {            // for single
       id = url.match(/v=([a-zA-Z0-9_-]+)&?/);
       if (id != null) {
         id = id[1];
@@ -99,38 +91,37 @@ $('#url-input').keypress(function(event) {
     }
 
     if (currentProcessCount < maxProcessCount)
-      download({'argus': argus, 'url': url, 'id': id, 'type': type});
+      download({'argus': argus, 'id': id, 'type': type});
     else
-      processQueue.push({'argus': argus, 'url': url, 'id': id, 'type': type});
+      processQueue.push({'argus': argus, 'id': id, 'type': type});
   }
 });
 
-function download(argus) {
+function download(params) {
   currentProcessCount += 1;
-  var message = ['', '', 0, 0];
-
-  var progressbar = "<div class='ui tiny " + color[argus['type']] + " horizontal label'>" + argus['type'] + "</div> \
-                     <span id='title-" + argus['id'] + "'>載入中...</span> \
-                     <div id='" + argus['id'] + "' class='ui small progress'> \
+  var progressbar = "<div class='ui " + color[params['type']] + " horizontal label'>" + params['type'] + "</div> \
+                     <span id='title-" + params['id'] + "'>載入中...</span> \
+                     <div id='" + params['id'] + "' class='ui small progress'> \
                       <div class='bar'> \
                         <div class='progress'></div> \
                       </div> \
                      </div>";
   $(".container").append(progressbar);
+  var message = ['', '', 0, 0];
 
-  var child = childProcess.spawn("youtube-dl", argus['argus']);
+  var child = childProcess.spawn("youtube-dl", params['argus']);
   child.stdout.on('data', function (data) {
-    if (argus['type'] == '單曲') {
+    if (params['type'] == '單曲') {
       var title = data.toString().match(/Destination\:(.*)\.\w+/);
       if (title != null) {
         var temp = title[1].split('/');
-        $('#title-' + argus['id']).html(temp[temp.length - 1]);
+        $('#title-' + params['id']).html(temp[temp.length - 1]);
       }
-      var value = parseInt($.trim(data).split(" ")[2].split("%")[0]);
-      if (value >= 0)
-        $('#' + argus['id']).progress({ percent: value });
+      var value = data.toString().match(/(\d{1,3}.\d{1}?)%/)
+      if (value != null)
+        $('#' + params['id']).progress({ percent: parseInt(value[1]) });
     }
-    else if (argus['type'] == '清單') {
+    else if (params['type'] == '清單') {
       var currentNumAndTotalNum = data.toString().match(/#(\d{1,3}) of (\d{1,3})/);
       var currentTitle = data.toString().match(/Destination\:(.*)\.\w+/);
 
@@ -142,20 +133,19 @@ function download(argus) {
       if (currentTitle != null) {
         var temp = currentTitle[1].split('/');
         message[1] = temp[temp.length - 1];
-        
-        $('#title-' + argus['id']).html(message.slice(0,2).join(": "));
-        $('#' + argus['id']).progress({ percent: (message[2]-1)/message[3] });
+        $('#title-' + params['id']).html(message.slice(0,2).join(": "));
+        $('#' + params['id']).progress({ percent: (message[2]-1)/message[3] });
       }
     }
   });
 
   child.stderr.on('data', function (data) {
-    $('#title-' + argus['id']).html('這個影片不存在');
-    $('#' + argus['id']).addClass('error');
+    $('#title-' + params['id']).html('這個影片不存在');
+    $('#' + params['id']).addClass('error');
   });
 
   child.on('exit', function (code) {
-    $('#' + argus['id']).progress({ percent: 100 });
+    $('#' + params['id']).progress({ percent: 100 });
     currentProcessCount -= 1;
     if (currentProcessCount < maxProcessCount && processQueue.length != 0) {
       download(processQueue.shift())
