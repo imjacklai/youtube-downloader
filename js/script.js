@@ -151,6 +151,7 @@ function download(argus) {
 
   child.stderr.on('data', function (data) {
     $('#title-' + argus['id']).html('這個影片不存在');
+    $('#' + argus['id']).addClass('error');
   });
 
   child.on('exit', function (code) {
