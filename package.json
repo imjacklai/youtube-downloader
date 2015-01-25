@@ -7,6 +7,6 @@
     "width": 600,
     "height": 600,
     "title": "Youtube Downloader",
-    "toolbar": true
+    "toolbar": false
   }
 }
