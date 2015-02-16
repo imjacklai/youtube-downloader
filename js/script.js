@@ -4,12 +4,11 @@ var maxProcessCount = 4;
 var currentProcessCount = 0;
 var color = { '單曲': 'red', '清單': 'teal' };
 
-$('#youtube-dl-link').click(function() {
-  gui.Shell.openExternal("https://github.com/rg3/youtube-dl");
-});
-
-$('#ffmpeg-link').click(function() {
-  gui.Shell.openExternal("https://www.ffmpeg.org/");
+$('.external-link').click(function() {
+  if ($(this).data('link') == 'youtube-dl')
+    gui.Shell.openExternal("https://github.com/rg3/youtube-dl");
+  else if ($(this).data('link') == 'ffmpeg')
+    gui.Shell.openExternal("https://www.ffmpeg.org/");
 });
 
 $('.title, .title i').click(function() {
